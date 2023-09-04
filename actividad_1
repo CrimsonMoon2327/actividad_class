@@ -1,0 +1,61 @@
+
+#Realizado por: Santiago Jimenez Guerrero
+'''La biblioteca de sympy nos permitirá utilizar funciones de álgebra de manera simple'''
+from sympy import * # Importamos toda la biblioteca de sympy
+
+x, n = symbols('x n') # Esta sentencia cambia a "x" y "n" a símbolos
+
+''' Nuestra función está definida por :
+func(x): 0 -pi/2 <= x < pi/2
+         1   pi/2 <= x < 3pi/2   '''
+
+fx = Piecewise((0, (x + n >= -pi/2) & (x + n < pi/2)),
+               (1, (x + n >= pi/2) & (x + n < 3*pi/2)),
+               (0, (x + n >= 3*pi/2) & (x + n < 5*pi/2)))
+
+# Calculamos a0 a traves de la fórmula; integrate(f(x)dx)
+ao = (1/pi) * integrate(0, (x, -pi/2, pi/2)) + \
+     (1/pi) * integrate(1, (x, pi/2, 3*pi/2))
+ao = together(ao) # Este comando simplifica la expresión
+print("a0 = \n")
+pprint(ao)
+
+# Calculamos an a través de la fórmula: integrate (f(x) cos((n*pi)/t)*x dx)
+an = (1/pi) * integrate(0 * cos((n*pi*x)/pi), (x,(-pi/2, pi/2))) + \
+     (1/pi) * integrate(1 * cos((n*pi*x)/pi), (x,(pi/2, 3*pi/2)))
+an = together(an) # Este comando simplifica la expresión
+print("an = \n")
+pprint(an)
+
+# Calculamos an a través de la fórmula: integrate (f(x) sin((n*pi)/t)*x dx)
+bn = (1/pi) * integrate(0 * sin((n*pi*x)/pi), (x,(-pi/2, 3*pi/2))) + \
+     (1/pi) * integrate(1 * sin((n*pi*x)/pi), (x,(pi/2, 3*pi/2)))
+bn = together(bn) # Este comando simplifica la expresión
+print("bn = \n")
+pprint(bn)
+
+print (f"\nf(x) = ")
+
+# Iniciamos nuestra serie con a0 e iremos sumando los coeficientes an y bn calculados
+serie = (ao/2)
+num_coeficiente = 100
+# Con el siguiente ciclo for repetimos el cálculo de an y bn tantas veces le sea indicado
+# y será concatenado a la serie existente:
+for i in range(1, num_coeficiente + 1):
+    serie += (an*cos((n*pi*x)/pi)).subs(n, i)
+    serie += (bn*sin((n*pi*x)/pi)).subs(n, i)
+
+pprint(serie) # Podemos imprimir nuestra serie con los coeficientes calculados
+
+# Graficamos la serie original
+f0 = fx.subs(n, 0)
+f1 = fx.subs(n, -2*pi)
+f2 = fx.subs(n, 2*pi)
+plotting.plot(f0,f1,f2, ylim=(-1, 2), xlim=(-0.5,10))
+
+
+# Graficamos la serie calculada
+plotting.plot(serie, ylim=(-1, 2), xlim=(-0.5,10))
+
+# También podemos comparar la serie calculada y la original
+plotting.plot(f0,f1,f2,serie, ylim=(-0.5, 1.5), xlim=(-6,6))
